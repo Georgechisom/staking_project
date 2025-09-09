@@ -3,34 +3,52 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useStake } from "@/hooks/useStake";
+import { parseEther } from "viem";
+import { toast } from "sonner";
 
 const StakingForm: React.FC = () => {
-  const [amount, setAmount] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [isLoadingButton, setIsLoadingButton] = useState(false);
+  const { stake, isLoading, error, isPaused } = useStake();
+
+  const [amount, setAmount] = useState<number>();
 
   const mockBalance = 1000; // Mock wallet balance
 
   const handleMax = () => {
-    setAmount(mockBalance.toString());
+    setAmount(mockBalance);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (
       !amount ||
-      parseFloat(amount) <= 0 ||
-      parseFloat(amount) > mockBalance
+      parseEther(amount.toString()) <= 0
+      // parseEther(amount.toString()) > mockBalance
     ) {
-      alert("Invalid amount");
+      toast("Ibvalid Inputs");
+      console.log("error");
       return;
     }
-    setIsLoading(true);
-    // Simulate staking
-    setTimeout(() => {
-      setIsLoading(false);
+
+    if (amount) {
+      stake(parseEther(amount.toString()));
+      // Reset form
+      setAmount(amount);
+    }
+    const amountBigInt = BigInt(amount.toString());
+    const result = await stake(amountBigInt);
+    if (result.success) {
+      setAmount(amount);
       setSuccess(true);
-      setAmount("");
+    }
+
+    setIsLoadingButton(true);
+    setTimeout(() => {
+      setIsLoadingButton(false);
+      setAmount(amount);
       setTimeout(() => setSuccess(false), 3000);
     }, 2000);
   };
@@ -50,16 +68,16 @@ const StakingForm: React.FC = () => {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-2">
+              <label className="block text-md my-3 font-medium mb-2 text-white">
                 Amount to Stake
               </label>
               <div className="flex space-x-2">
                 <Input
                   type="number"
                   value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
+                  onChange={(e) => setAmount(Number(e.target.value))}
                   placeholder="Enter amount"
-                  className="flex-1"
+                  className="flex-1 text-white"
                 />
                 <Button type="button" onClick={handleMax} variant="outline">
                   Max
@@ -72,13 +90,28 @@ const StakingForm: React.FC = () => {
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button
                 type="submit"
-                className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
-                disabled={isLoading}
+                disabled={isLoadingButton || isPaused}
+                onClick={handleSubmit}
+                className={`w-full py-2 rounded text-white font-semibold ${
+                  isLoadingButton || isPaused
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 cursor-pointer"
+                }`}
               >
                 {isLoading ? "Staking..." : "Stake"}
               </Button>
             </motion.div>
           </form>
+          {isPaused && (
+            <p className="text-red-600 mt-2 font-semibold">
+              Staking is currently paused.
+            </p>
+          )}
+          {error && (
+            <p className="text-red-600 mt-2 font-semibold overflow-hidden">
+              Error: {error}
+            </p>
+          )}
           {success && (
             <motion.div
               className="mt-4 p-3 bg-green-500/20 border border-green-500 rounded text-green-400 text-center"
