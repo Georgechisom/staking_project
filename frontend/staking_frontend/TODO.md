@@ -1,5 +1,0 @@
-- [x] Remove unused React import from src/App.tsx
-- [ ] Update vite.config.ts for ES module compatibility (path import, \_\_dirname replacement)
-- [ ] Install @types/node dev dependency
-- [x] Run npm run dev to start the app
-- [x] Verify app starts without errors
