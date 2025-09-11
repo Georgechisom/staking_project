@@ -103,7 +103,7 @@ const Dashboard: React.FC = () => {
               className="w-52 my-6"
               onClick={() => navigate("/stake")}
             >
-              <Button className="w-full bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600">
+              <Button className=" bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600">
                 Stake Now
               </Button>
             </motion.div>
@@ -145,7 +145,7 @@ const Dashboard: React.FC = () => {
               className="w-52 my-6"
               onClick={() => navigate("/rewards")}
             >
-              <Button className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600">
+              <Button className=" bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600">
                 Claim Rewards
               </Button>
             </motion.div>

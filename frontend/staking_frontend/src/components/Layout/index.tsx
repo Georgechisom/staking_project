@@ -98,7 +98,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
           {isMenuOpen && (
             <motion.div
               className={`md:hidden fixed top-20 right-0 w-64 h-screen ${
-                isDark ? "bg-black/90" : "bg-white/90"
+                isDark ? "bg-black/90" : "bg-gray-700/90"
               } backdrop-blur-md border-l border-purple-500/20 shadow-xl`}
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
