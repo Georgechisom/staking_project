@@ -28,7 +28,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
     <div
       className={`w-full min-h-screen ${
         isDark ? "bg-black text-white" : "bg-gray-700 text-black"
-      } flex flex-col`}
+      } flex flex-col relative`}
     >
       {/* Navbar */}
       <nav
