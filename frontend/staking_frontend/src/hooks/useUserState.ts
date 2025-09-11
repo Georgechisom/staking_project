@@ -344,9 +344,7 @@ export const useUserState = () => {
 
   const balance = useCallback(async (): Promise<bigint> => {
     if (!publicClient || !address) {
-      const errorWalletMsg = "Wallet not connected";
-      setError(errorWalletMsg);
-      return { success: false, error: errorWalletMsg };
+      throw new Error("Wallet not connected");
     }
 
     try {

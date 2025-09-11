@@ -38,11 +38,11 @@ const StatsCards: React.FC = () => {
   const getTotalStakedDisplay = () => {
     if (isLoading) return "Loading...";
     if (error) return "0";
-    if (typeof totalStaked === "string") {
-      return Number(totalStaked);
-    }
-    console.log("totalStaked", totalStaked);
-    return Number(totalStaked);
+    const num =
+      typeof totalStaked === "string"
+        ? Number(totalStaked)
+        : Number(totalStaked);
+    return (num / 1e18).toFixed(5);
   };
 
   const getTotalUsers = () => {

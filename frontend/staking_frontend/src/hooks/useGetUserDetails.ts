@@ -17,6 +17,7 @@ interface UseGetUserDetailsReturn {
   refetch: () => void;
   userStakeUsers: () => void;
   totalUsers: bigint;
+  stakers: string[];
 }
 
 export const useGetUserDetails = (): UseGetUserDetailsReturn => {
@@ -29,6 +30,7 @@ export const useGetUserDetails = (): UseGetUserDetailsReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [totalUsers, setTotalUsers] = useState<bigint>(0n);
+  const [stakers, setStakers] = useState<string[]>([]);
 
   const fetchUserDetails = useCallback(async () => {
     if (!address || !publicClient) {
@@ -69,7 +71,12 @@ export const useGetUserDetails = (): UseGetUserDetailsReturn => {
         eventName: "Staked",
         fromBlock: 0n,
       });
-      const users = new Set(logs.map((log) => (log as any).args.user));
+      const users = new Set<string>();
+      logs.forEach((log) => {
+        const user = (log as any).args?.user;
+        if (user) users.add(user);
+      });
+      setStakers(Array.from(users));
       setTotalUsers(BigInt(users.size));
     } catch (err) {
       console.error("Error fetching total users:", err);
@@ -169,5 +176,6 @@ export const useGetUserDetails = (): UseGetUserDetailsReturn => {
     error,
     userStakeUsers,
     refetch: fetchUserDetails,
+    stakers,
   };
 };

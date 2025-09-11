@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { Menu, X } from "lucide-react";
-import { useLocation } from "react-router-dom";
+import { Menu, X, Sun, Moon } from "lucide-react";
+import { useLocation, Link } from "react-router-dom";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -10,7 +10,10 @@ interface AppLayoutProps {
 
 const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isDark, setIsDark] = useState(true);
   const location = useLocation();
+
+  const toggleTheme = () => setIsDark(!isDark);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
@@ -22,9 +25,17 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   ];
 
   return (
-    <div className="w-full min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white flex flex-col">
+    <div
+      className={`w-full min-h-screen ${
+        isDark ? "bg-black text-white" : "bg-gray-700 text-black"
+      } flex flex-col`}
+    >
       {/* Navbar */}
-      <nav className="fixed top-0 w-full h-20 bg-black/20 backdrop-blur-md shadow-lg border-b border-purple-500/20 z-50 px-4">
+      <nav
+        className={`fixed top-0 w-full h-20 ${
+          isDark ? "bg-black/20" : "bg-white/20"
+        } backdrop-blur-md shadow-lg border-b border-purple-500/50 z-50 px-4`}
+      >
         <div className="w-full h-full flex justify-between items-center">
           {/* Logo */}
           <motion.div
@@ -39,9 +50,8 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
           {/* Desktop Nav Links */}
           <div className="hidden md:flex space-x-8">
             {navLinks.map((link) => (
-              <motion.a
+              <motion.div
                 key={link.name}
-                href={link.href}
                 className={`transition-colors duration-200 ${
                   location.pathname === link.href
                     ? "text-purple-400 border-b-2 border-purple-400"
@@ -50,13 +60,26 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                {link.name}
-              </motion.a>
+                <Link to={link.href} className="block">
+                  {link.name}
+                </Link>
+              </motion.div>
             ))}
           </div>
 
-          {/* Desktop Connect Button */}
-          <div className="hidden md:block">
+          {/* Desktop Connect Button and Theme Toggle */}
+          <div className="hidden md:flex items-center space-x-4">
+            <button
+              onClick={toggleTheme}
+              className={`p-2 rounded-full ${
+                isDark
+                  ? "text-white hover:bg-white/10"
+                  : "text-black hover:bg-black/10"
+              }`}
+              aria-label="Toggle theme"
+            >
+              {isDark ? <Sun size={20} /> : <Moon size={20} />}
+            </button>
             <ConnectButton />
           </div>
 
@@ -74,17 +97,29 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
         <AnimatePresence>
           {isMenuOpen && (
             <motion.div
-              className="md:hidden fixed top-20 right-0 w-64 h-screen bg-black/90 backdrop-blur-md border-l border-purple-500/20 shadow-xl"
+              className={`md:hidden fixed top-20 right-0 w-64 h-screen ${
+                isDark ? "bg-black/90" : "bg-white/90"
+              } backdrop-blur-md border-l border-purple-500/20 shadow-xl`}
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ duration: 0.3, ease: "easeInOut" }}
             >
               <div className="flex flex-col space-y-4 p-4 mt-4">
+                <button
+                  onClick={toggleTheme}
+                  className={`p-2 rounded-full self-start ${
+                    isDark
+                      ? "text-white hover:bg-white/10"
+                      : "text-black hover:bg-black/10"
+                  }`}
+                  aria-label="Toggle theme"
+                >
+                  {isDark ? <Sun size={20} /> : <Moon size={20} />}
+                </button>
                 {navLinks.map((link) => (
-                  <motion.a
+                  <motion.div
                     key={link.name}
-                    href={link.href}
                     className={`transition-colors duration-200 ${
                       location.pathname === link.href
                         ? "text-purple-400 border-l-4 border-purple-400 pl-2"
@@ -94,8 +129,10 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    {link.name}
-                  </motion.a>
+                    <Link to={link.href} className="block">
+                      {link.name}
+                    </Link>
+                  </motion.div>
                 ))}
               </div>
             </motion.div>
@@ -125,8 +162,11 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 
       {/* Footer */}
       <footer className="w-full h-16 bg-black/20 backdrop-blur-md border-t border-purple-500/20 py-3 px-4">
-        <div className="flex justify-center items-center h-full text-gray-400 text-sm">
-          &copy; {new Date().getFullYear()} WinsomeStakes. All rights reserved.
+        <div className="flex justify-center items-center h-full text-gray-400 text-sm ">
+          &copy; {new Date().getFullYear()}
+          {"  "}
+          <span className="text-blue-400  mx-2">WinsomeStakes.</span>{" "}
+          <span className="text-purple-400">All rights reserved.</span>
         </div>
       </footer>
     </div>
