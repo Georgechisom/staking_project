@@ -126,7 +126,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       {/* Footer */}
       <footer className="w-full h-16 bg-black/20 backdrop-blur-md border-t border-purple-500/20 py-3 px-4">
         <div className="flex justify-center items-center h-full text-gray-400 text-sm">
-          &copy; {new Date().getFullYear()} StakeDApp. All rights reserved.
+          &copy; {new Date().getFullYear()} WinsomeStakes. All rights reserved.
         </div>
       </footer>
     </div>

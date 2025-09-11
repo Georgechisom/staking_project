@@ -1,12 +1,4 @@
-import { toast } from "sonner";
-import { useCallback, useState } from "react";
-import {
-  usePublicClient,
-  useWriteContract,
-  useReadContract,
-  useAccount,
-  useWatchContractEvent,
-} from "wagmi";
+import { useReadContract, useAccount, useWatchContractEvent } from "wagmi";
 import { Staking_Contract_Abi } from "../config/Abi";
 
 interface UserDetails {
@@ -17,14 +9,7 @@ interface UserDetails {
   canWithdraw: boolean;
 }
 
-interface StakeResult {
-  success: boolean;
-  txHash?: string;
-  error?: string;
-}
-
 interface UseStakeReturn {
-  stake: (amount: bigint) => Promise<StakeResult>;
   isLoading: boolean;
   error: string | null;
   userStakedAmount: bigint;
@@ -32,14 +17,11 @@ interface UseStakeReturn {
   timeUntilUnlock: bigint;
   totalStaked: bigint;
   isPaused: boolean;
+  canWithdraw: boolean;
 }
 
 export const useStake = (): UseStakeReturn => {
-  const publicClient = usePublicClient();
-  const { writeContractAsync } = useWriteContract();
   const { address } = useAccount();
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   // Contract address
   const contractAddress = import.meta.env
@@ -68,13 +50,12 @@ export const useStake = (): UseStakeReturn => {
     functionName: "paused",
   });
 
-  // Watch for Staked events
+  // Watch for contract events
   useWatchContractEvent({
     address: contractAddress,
     abi: Staking_Contract_Abi,
     eventName: "Staked",
     onLogs: (logs) => {
-      // Refetch data when any Staked event occurs
       if (logs.length > 0) {
         refetchUserDetails();
         refetchTotalStaked();
@@ -83,97 +64,12 @@ export const useStake = (): UseStakeReturn => {
     },
   });
 
-  const stake = useCallback(
-    async (amount: bigint): Promise<StakeResult> => {
-      if (!publicClient || !writeContractAsync || !address) {
-        const errorMsg = "Wallet not connected";
-        toast.error(errorMsg, {
-          description: "Please connect your wallet to continue",
-        });
-        return { success: false, error: errorMsg };
-      }
+  // Event watchers are handled in individual hooks (useWithdraw, useClaimRewards)
 
-      if (amount <= 0n) {
-        const errorMsg = "Invalid amount";
-        toast.error(errorMsg, {
-          description: "Amount must be greater than 0",
-        });
-        return { success: false, error: errorMsg };
-      }
-
-      if (isPaused) {
-        const errorMsg = "Staking is currently paused";
-        toast.error(errorMsg, {
-          description: "Please try again later",
-        });
-        return { success: false, error: errorMsg };
-      }
-
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        console.log("Staking amount:", amount);
-
-        const txHash = await writeContractAsync({
-          address: contractAddress,
-          abi: Staking_Contract_Abi,
-          functionName: "stake",
-          args: [amount],
-        });
-
-        console.log("Transaction hash:", txHash);
-
-        // Wait for transaction confirmation
-        const txReceipt = await publicClient.waitForTransactionReceipt({
-          hash: txHash,
-        });
-
-        if (txReceipt.status === "success") {
-          toast.success("Staking successful!", {
-            description: `Successfully staked ${amount.toString()} tokens`,
-          });
-          // Refetch data after successful stake
-          refetchUserDetails();
-          refetchTotalStaked();
-          refetchIsPaused();
-          return { success: true, txHash };
-        } else {
-          const errorMsg = "Transaction failed";
-          toast.error(errorMsg, {
-            description: "The transaction was reverted. Please try again.",
-          });
-          return { success: false, error: errorMsg };
-        }
-      } catch (err: unknown) {
-        console.error("Staking error:", err);
-        const errorMsg =
-          err instanceof Error
-            ? err.message
-            : "An error occurred while staking";
-        setError(errorMsg);
-        toast.error("Staking failed", {
-          description: errorMsg,
-        });
-        return { success: false, error: errorMsg };
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [
-      publicClient,
-      writeContractAsync,
-      address,
-      isPaused,
-      contractAddress,
-      refetchUserDetails,
-      refetchTotalStaked,
-      refetchIsPaused,
-    ]
-  );
+  const isLoading = false; // Set to true if you have loading state
+  const error = null; // Set to error message if any
 
   return {
-    stake,
     isLoading,
     error,
     userStakedAmount: (userDetails as UserDetails)?.stakedAmount || 0n,
@@ -181,5 +77,6 @@ export const useStake = (): UseStakeReturn => {
     timeUntilUnlock: (userDetails as UserDetails)?.timeUntilUnlock || 0n,
     totalStaked: (totalStaked as bigint) || 0n,
     isPaused: (isPaused as boolean) || false,
+    canWithdraw: (userDetails as UserDetails)?.canWithdraw || false,
   };
 };
