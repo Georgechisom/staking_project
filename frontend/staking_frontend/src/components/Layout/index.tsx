@@ -48,7 +48,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
           </motion.div>
 
           {/* Desktop Nav Links */}
-          <div className="hidden md:flex space-x-8">
+          <div className="hidden md:flex space-x-8 md:mx-5 lg:mx-0">
             {navLinks.map((link) => (
               <motion.div
                 key={link.name}

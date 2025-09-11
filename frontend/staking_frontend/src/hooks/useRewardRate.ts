@@ -28,7 +28,7 @@ export const useRewardRate = (): UseTotalStakesReturn => {
   });
 
   const [RewardRate, setRewardRate] = useState<bigint>(0n);
-  console.log({ RewardRateFromContract, RewardRate });
+  // console.log({ RewardRateFromContract, RewardRate });
 
   // Initialize totalStaked state from contract data
   useEffect(() => {

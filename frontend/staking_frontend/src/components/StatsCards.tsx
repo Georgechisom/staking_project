@@ -2,15 +2,15 @@ import React from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useTotalStakes } from "@/hooks/useTotalStakes";
-import { useGetUserDetails } from "@/hooks/useGetUserDetails";
 import { useApr } from "@/hooks/useApr";
 import { useRewardRate } from "@/hooks/useRewardRate";
+import { usePenaltyFee } from "@/hooks/usePenaltyFee";
 
 const StatsCards: React.FC = () => {
   const { totalStaked, isLoading, error } = useTotalStakes();
-  const { totalUsers } = useGetUserDetails();
   const { Apr } = useApr();
   const { RewardRate } = useRewardRate();
+  const { penaltyFee } = usePenaltyFee();
 
   const parseToBigInt = (amount: string, decimals = 18n): bigint => {
     const [whole, frac = ""] = amount.split(".");
@@ -31,7 +31,7 @@ const StatsCards: React.FC = () => {
     if (typeof Apr === "string") {
       return parseToBigInt(Apr);
     }
-    console.log(Apr);
+    // console.log(Apr);
     return Apr;
   };
 
@@ -45,11 +45,11 @@ const StatsCards: React.FC = () => {
     return (num / 1e18).toFixed(5);
   };
 
-  const getTotalUsers = () => {
+  const getPenaltyFee = () => {
     if (isLoading) return "Loading...";
     if (error) return "0";
-    console.log("totalUsers", totalUsers);
-    return totalUsers.toString();
+    // console.log("PenaltyFee", penaltyFee);
+    return penaltyFee.toString();
   };
 
   const getRewardRate = () => {
@@ -58,14 +58,14 @@ const StatsCards: React.FC = () => {
     if (typeof RewardRate === "string") {
       return parseToBigInt(RewardRate);
     }
-    console.log("RewardRate", RewardRate);
+    // console.log("RewardRate", RewardRate);
     return RewardRate;
   };
 
   const stats = [
     { title: "Total Staked", value: getTotalStakedDisplay(), unit: "" },
     { title: "Current APR", value: getApr(), unit: "%" },
-    { title: "Total Users", value: getTotalUsers(), unit: "" },
+    { title: "Emergency Withdraw Penalty", value: getPenaltyFee(), unit: "" },
     { title: "Reward Rate", value: getRewardRate(), unit: "%" },
   ];
 

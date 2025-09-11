@@ -2,58 +2,58 @@ import { useReadContract, useWatchContractEvent } from "wagmi";
 import { useState, useEffect } from "react";
 import { Staking_Contract_Abi } from "../config/Abi";
 
-interface UseTotalStakesReturn {
-  totalStaked: bigint;
+interface UsePenaltyFeeReturn {
+  penaltyFee: bigint;
   isLoading: boolean;
   error: string | null;
   refetch: () => void;
 }
 
-export const useTotalStakes = (): UseTotalStakesReturn => {
+export const usePenaltyFee = (): UsePenaltyFeeReturn => {
   const contractAddress = import.meta.env
     .VITE_Staking_Contract_Address as `0x${string}`;
 
   const {
-    data: totalStakedFromContract,
+    data: penaltyFeeFromContract,
     isLoading,
     error,
     refetch,
   } = useReadContract({
     address: contractAddress,
     abi: Staking_Contract_Abi,
-    functionName: "totalStaked",
+    functionName: "emergencyWithdrawPenalty",
     query: {
       enabled: !!contractAddress,
     },
   });
 
-  const [totalStaked, setTotalStaked] = useState<bigint>(0n);
-  // console.log(totalStaked);
+  const [penaltyFee, setPenaltyFee] = useState<bigint>(0n);
+  // console.log({ penaltyFeeFromContract, penaltyFee });
 
   // Initialize totalStaked state from contract data
   useEffect(() => {
-    if (totalStakedFromContract !== undefined) {
-      setTotalStaked(totalStakedFromContract as bigint);
+    if (penaltyFeeFromContract !== undefined) {
+      setPenaltyFee(penaltyFeeFromContract as bigint);
     }
-  }, [totalStakedFromContract]);
+  }, [penaltyFeeFromContract]);
 
   // Watch for Staked events and update totalStaked
   useWatchContractEvent({
     address: contractAddress,
     abi: Staking_Contract_Abi,
-    eventName: "Staked",
+    eventName: "initialApr",
     onLogs: (logs) => {
-      console.log("Staked event detected:", logs);
+      console.log("Apr event detected:", logs);
 
       // Extract amount from event and add to totalStaked
       const log = logs[0] as { args?: { amount?: bigint } };
       const amount = log.args?.amount ?? 0n;
-      setTotalStaked((prev) => prev + amount);
+      setPenaltyFee((prev) => prev + amount);
     },
   });
 
   return {
-    totalStaked: (totalStaked as bigint) || 0n,
+    penaltyFee: (penaltyFee as bigint) || 0n,
     isLoading,
     error: error ? (error as Error).message : null,
     refetch,

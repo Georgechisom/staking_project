@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import StatsCards from "../components/StatsCards";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useGetUserDetails } from "@/hooks/useGetUserDetails";
+import { usePenaltyFee } from "@/hooks/usePenaltyFee";
 import { useAccount } from "wagmi";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
@@ -10,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 const Dashboard: React.FC = () => {
   const { address } = useAccount();
   const { userDetails, isLoading, error, stakers } = useGetUserDetails();
+  const { penaltyFee } = usePenaltyFee();
   const navigate = useNavigate();
   const [remainingTime, setRemainingTime] = useState<number>(0);
 
@@ -90,6 +92,9 @@ const Dashboard: React.FC = () => {
                   <p>
                     <strong>Time Until Unlock:</strong>{" "}
                     {formatTime(BigInt(remainingTime))}
+                  </p>
+                  <p>
+                    <strong>Penalty Fee:</strong> {penaltyFee.toString()}
                   </p>
                 </>
               )}

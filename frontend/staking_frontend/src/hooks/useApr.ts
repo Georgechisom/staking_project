@@ -28,7 +28,7 @@ export const useApr = (): UseTotalStakesReturn => {
   });
 
   const [Apr, setApr] = useState<bigint>(0n);
-  console.log({ AprFromContract, Apr });
+  // console.log({ AprFromContract, Apr });
 
   // Initialize totalStaked state from contract data
   useEffect(() => {
