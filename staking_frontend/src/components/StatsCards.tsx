@@ -32,15 +32,12 @@ const StatsCards: React.FC = () => {
     error: usersError,
   } = useActiveUsers();
 
-  const parseToBigInt = (amount: string, decimals = 18n): bigint => {
+  const parseToBigInt = (amount: string, decimals = 18): bigint => {
     const [whole, frac = ""] = amount.split(".");
 
-    const fracPadded = (frac + "0".repeat(Number(decimals))).slice(
-      0,
-      Number(decimals)
-    );
+    const fracPadded = (frac + "0".repeat(Number(decimals))).slice(0, decimals);
 
-    return BigInt(whole) * 10n ** decimals + BigInt(fracPadded);
+    return BigInt(whole) * 10n ** BigInt(decimals) + BigInt(fracPadded);
   };
 
   // console.log(apr);
@@ -49,10 +46,10 @@ const StatsCards: React.FC = () => {
     if (isLoading) return "Loading...";
     if (error) return "0";
     if (typeof Apr === "string") {
-      return parseToBigInt(Apr);
+      return parseToBigInt(Apr).toString();
     }
     // console.log(Apr);
-    return Apr;
+    return Apr.toString();
   };
 
   const getTotalStakedDisplay = () => {
@@ -76,10 +73,10 @@ const StatsCards: React.FC = () => {
     if (isLoading) return "Loading...";
     if (error) return "0";
     if (typeof RewardRate === "string") {
-      return parseToBigInt(RewardRate);
+      return parseToBigInt(RewardRate).toString();
     }
     // console.log("RewardRate", RewardRate);
-    return RewardRate;
+    return RewardRate.toString();
   };
 
   const getTotalTransactions = () => {
