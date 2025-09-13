@@ -2,11 +2,18 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import StatsCards from "../components/StatsCards";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useGetUserDetails } from "@/hooks/useGetUserDetails";
 import { usePenaltyFee } from "@/hooks/usePenaltyFee";
 import { useAccount } from "wagmi";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import {
+  useUserStakes,
+  useUserWithdrawals,
+  useUserClaims,
+  useUserTotalStaked,
+} from "@/surgraph/hooks";
 
 const Dashboard: React.FC = () => {
   const { address } = useAccount();
@@ -14,6 +21,17 @@ const Dashboard: React.FC = () => {
   const { penaltyFee } = usePenaltyFee();
   const navigate = useNavigate();
   const [remainingTime, setRemainingTime] = useState<number>(0);
+
+  // Surgraph hooks
+  const { stakes, loading: stakesLoading } = useUserStakes(address);
+  const {
+    withdrawals,
+    emergencyWithdrawals,
+    loading: withdrawalsLoading,
+  } = useUserWithdrawals(address);
+  const { claims, loading: claimsLoading } = useUserClaims(address);
+  const { totalStaked: surgraphTotalStaked, loading: totalStakedLoading } =
+    useUserTotalStaked(address);
 
   useEffect(() => {
     if (userDetails?.timeUntilUnlock) {
@@ -50,6 +68,45 @@ const Dashboard: React.FC = () => {
     return `${hrs}h ${mins}m ${secs}s`;
   };
 
+  const getUserTotalStakes = () => {
+    if (stakesLoading) return "Loading...";
+    if (stakes && stakes.length > 0) {
+      const total = stakes.reduce(
+        (sum, stake) => sum + Number(stake.amount),
+        0
+      );
+      return (total / 1e18).toFixed(2);
+    }
+    return "0";
+  };
+
+  const getUserTotalWithdrawals = () => {
+    if (withdrawalsLoading) return "Loading...";
+    let total = 0;
+    if (withdrawals) {
+      total += withdrawals.reduce((sum, w) => sum + Number(w.amount), 0);
+    }
+    if (emergencyWithdrawals) {
+      total += emergencyWithdrawals.reduce(
+        (sum, ew) => sum + Number(ew.amount),
+        0
+      );
+    }
+    return (total / 1e18).toFixed(2);
+  };
+
+  const getUserTotalClaims = () => {
+    if (claimsLoading) return "Loading...";
+    if (claims && claims.length > 0) {
+      const total = claims.reduce(
+        (sum, claim) => sum + Number(claim.amount),
+        0
+      );
+      return (total / 1e18).toFixed(5);
+    }
+    return "0";
+  };
+
   return (
     <motion.div
       className="space-y-8"
@@ -83,11 +140,11 @@ const Dashboard: React.FC = () => {
                   </p>
                   <p>
                     <strong>Your Staked Amount:</strong>{" "}
-                    {(Number(userDetails.stakedAmount) / 1e18).toFixed(5)}
+                    {(Number(userDetails.stakedAmount) / 1e18).toFixed(2)}
                   </p>
                   <p>
                     <strong>Your Pending Rewards:</strong>{" "}
-                    {(Number(userDetails.pendingRewards) / 1e18).toFixed(5)}
+                    {(Number(userDetails.pendingRewards) / 1e18).toFixed(2)}
                   </p>
                   <p>
                     <strong>Time Until Unlock:</strong>{" "}
@@ -199,6 +256,52 @@ const Dashboard: React.FC = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* User Details Section */}
+      <Card className="bg-gradient-to-br from-slate-900 to-purple-900 border-purple-500/20 text-white">
+        <CardHeader>
+          <CardTitle className="text-center text-purple-400">
+            Your Activity Details
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {!address ? (
+            <div className="text-center block justify-center">
+              <p className="mb-4">Connect your wallet to see your details.</p>
+              <div className="flex justify-center my-3">
+                <ConnectButton />
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="text-center">
+                <p className="text-sm text-gray-400">Total Stakes</p>
+                <p className="text-2xl font-bold">{getUserTotalStakes()}</p>
+              </div>
+              <div className="text-center">
+                <p className="text-sm text-gray-400">Total Withdrawals</p>
+                <p className="text-2xl font-bold">
+                  {Number(getUserTotalWithdrawals()).toFixed(2)}
+                </p>
+              </div>
+              <div className="text-center">
+                <p className="text-sm text-gray-400">Total Claims</p>
+                <p className="text-2xl font-bold">{getUserTotalClaims()}</p>
+              </div>
+              <div className="text-center">
+                <p className="text-sm text-gray-400">Current Balance</p>
+                <p className="text-2xl font-bold">
+                  {totalStakedLoading
+                    ? "Loading..."
+                    : surgraphTotalStaked
+                    ? (Number(surgraphTotalStaked) / 1e18).toFixed(2)
+                    : "0"}
+                </p>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </motion.div>
   );
 };

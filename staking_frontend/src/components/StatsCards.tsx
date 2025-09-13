@@ -5,12 +5,32 @@ import { useTotalStakes } from "@/hooks/useTotalStakes";
 import { useApr } from "@/hooks/useApr";
 import { useRewardRate } from "@/hooks/useRewardRate";
 import { usePenaltyFee } from "@/hooks/usePenaltyFee";
+import {
+  useContractDetails,
+  useTotalTransactions,
+  useActiveUsers,
+} from "@/surgraph/hooks";
 
 const StatsCards: React.FC = () => {
   const { totalStaked, isLoading, error } = useTotalStakes();
   const { Apr } = useApr();
   const { RewardRate } = useRewardRate();
   const { penaltyFee } = usePenaltyFee();
+  const {
+    data: contractDetails,
+    loading: contractLoading,
+    error: contractError,
+  } = useContractDetails();
+  const {
+    totalTransactions,
+    loading: txLoading,
+    error: txError,
+  } = useTotalTransactions();
+  const {
+    activeUsers,
+    loading: usersLoading,
+    error: usersError,
+  } = useActiveUsers();
 
   const parseToBigInt = (amount: string, decimals = 18n): bigint => {
     const [whole, frac = ""] = amount.split(".");
@@ -42,7 +62,7 @@ const StatsCards: React.FC = () => {
       typeof totalStaked === "string"
         ? Number(totalStaked)
         : Number(totalStaked);
-    return (num / 1e18).toFixed(5);
+    return (num / 1e18).toFixed(2);
   };
 
   const getPenaltyFee = () => {
@@ -62,15 +82,70 @@ const StatsCards: React.FC = () => {
     return RewardRate;
   };
 
+  const getTotalTransactions = () => {
+    if (txLoading) return "Loading...";
+    if (txError) return "0";
+    return totalTransactions?.toString() || "0";
+  };
+
+  const getTotalRewardClaims = () => {
+    if (contractLoading) return "Loading...";
+    if (contractError) return "0";
+    if (contractDetails?.totalRewardsGiven) {
+      return (Number(contractDetails.totalRewardsGiven) / 1e18).toFixed(2);
+    }
+    return "0";
+  };
+
+  const getTotalMinted = () => {
+    if (contractLoading) return "Loading...";
+    if (contractError) return "0";
+    if (contractDetails?.totalMinted) {
+      return (Number(contractDetails.totalMinted) / 1e18).toFixed(2);
+    }
+    return "0";
+  };
+
+  const getTotalWithdrawals = () => {
+    if (contractLoading) return "Loading...";
+    if (contractError) return "0";
+    if (contractDetails?.totalWithdrawn) {
+      return (Number(contractDetails.totalWithdrawn) / 1e18).toFixed(2);
+    }
+    return "0";
+  };
+
+  const getActiveUsers = () => {
+    if (usersLoading) return "Loading...";
+    if (usersError) return "0";
+    return activeUsers.toString();
+  };
+
+  const getAverageStake = () => {
+    if (contractLoading || usersLoading) return "Loading...";
+    if (contractError || usersError) return "0";
+    if (contractDetails?.totalStakes && activeUsers > 0) {
+      const avg = Number(contractDetails.totalStakes) / activeUsers / 1e18;
+      return avg.toFixed(5);
+    }
+    return "0";
+  };
+
   const stats = [
     { title: "Total Staked", value: getTotalStakedDisplay(), unit: "" },
     { title: "Current APR", value: getApr(), unit: "%" },
     { title: "Emergency Withdraw Penalty", value: getPenaltyFee(), unit: "" },
     { title: "Reward Rate", value: getRewardRate(), unit: "%" },
+    { title: "Total Transactions", value: getTotalTransactions(), unit: "" },
+    { title: "Total Reward Claims", value: getTotalRewardClaims(), unit: "" },
+    { title: "Total Minted", value: getTotalMinted(), unit: "" },
+    { title: "Total Withdrawals", value: getTotalWithdrawals(), unit: "" },
+    { title: "Active Users", value: getActiveUsers(), unit: "" },
+    { title: "Average Stake", value: getAverageStake(), unit: "" },
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
       {stats.map((stat, index) => (
         <motion.div
           key={stat.title}

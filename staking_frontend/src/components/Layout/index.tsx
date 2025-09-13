@@ -44,7 +44,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5 }}
           >
-            WinsomeStakes
+            <div>WinsomeStakes</div>
           </motion.div>
 
           {/* Desktop Nav Links */}
