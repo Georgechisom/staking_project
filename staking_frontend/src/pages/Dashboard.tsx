@@ -18,7 +18,7 @@ import { formatUnits } from "viem";
 
 const Dashboard: React.FC = () => {
   const { address } = useAccount();
-  const { userDetails, isLoading, error, stakers } = useGetUserDetails();
+  const { userDetails, isLoading, error } = useGetUserDetails();
   const { penaltyFee } = usePenaltyFee();
   const navigate = useNavigate();
   const [remainingTime, setRemainingTime] = useState<number>(0);
