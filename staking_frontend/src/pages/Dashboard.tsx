@@ -14,10 +14,11 @@ import {
   useUserClaims,
   useUserTotalStaked,
 } from "@/surgraph/hooks";
+import { formatUnits } from "viem";
 
 const Dashboard: React.FC = () => {
   const { address } = useAccount();
-  const { userDetails, isLoading, error, stakers } = useGetUserDetails();
+  const { userDetails, isLoading, error } = useGetUserDetails();
   const { penaltyFee } = usePenaltyFee();
   const navigate = useNavigate();
   const [remainingTime, setRemainingTime] = useState<number>(0);
@@ -48,16 +49,16 @@ const Dashboard: React.FC = () => {
     }
   }, [remainingTime]);
 
-  const parseToBigInt = (amount: string, decimals = 18n): bigint => {
-    const [whole, frac = ""] = amount.split(".");
+  // const parseToBigInt = (amount: string, decimals = 18n): bigint => {
+  //   const [whole, frac = ""] = amount.split(".");
 
-    const fracPadded = (frac + "0".repeat(Number(decimals))).slice(
-      0,
-      Number(decimals)
-    );
+  //   const fracPadded = (frac + "0".repeat(Number(decimals))).slice(
+  //     0,
+  //     Number(decimals)
+  //   );
 
-    return BigInt(whole) * 10n ** decimals + BigInt(fracPadded);
-  };
+  //   return BigInt(whole) * 10n ** decimals + BigInt(fracPadded);
+  // };
 
   const formatTime = (secondsBigInt: bigint) => {
     const seconds = Number(secondsBigInt);
@@ -119,7 +120,7 @@ const Dashboard: React.FC = () => {
       </h1>
       <StatsCards />
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <Card className="bg-gradient-to-br from-purple-900 to-slate-900 border-purple-500/20 text-white">
           <CardHeader>
             <CardTitle className="text-center text-purple-400">Stake</CardTitle>
@@ -140,11 +141,11 @@ const Dashboard: React.FC = () => {
                   </p>
                   <p>
                     <strong>Your Staked Amount:</strong>{" "}
-                    {(Number(userDetails.stakedAmount) / 1e18).toFixed(2)}
+                    {(Number(userDetails.stakedAmount) / 1e18).toFixed(3)}
                   </p>
                   <p>
                     <strong>Your Pending Rewards:</strong>{" "}
-                    {(Number(userDetails.pendingRewards) / 1e18).toFixed(2)}
+                    {(Number(userDetails.pendingRewards) / 1e18).toFixed(3)}
                   </p>
                   <p>
                     <strong>Time Until Unlock:</strong>{" "}
@@ -190,10 +191,11 @@ const Dashboard: React.FC = () => {
               {address && !isLoading && !error && userDetails && (
                 <>
                   <p>
-                    <strong>Your Pending Rewards:</strong>{" "}
-                    {parseToBigInt(
-                      userDetails.pendingRewards.toString()
-                    ).toString()}
+                    <strong className="">Your Pending Rewards: </strong>
+                    {"   "}
+                    {Number(
+                      formatUnits(userDetails.pendingRewards, 18)
+                    ).toFixed(5)}
                   </p>
                 </>
               )}
@@ -207,52 +209,10 @@ const Dashboard: React.FC = () => {
               className="w-52 my-6"
               onClick={() => navigate("/rewards")}
             >
-              <Button className=" bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600">
+              <Button className=" bg-gradient-to-r from-pink-500 to-purple-500 hover:from-purple-600 hover:to-pink-600">
                 Claim Rewards
               </Button>
             </motion.div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-purple-900 to-slate-900 border-purple-500/20 text-white">
-          <CardHeader>
-            <CardTitle className="text-center text-purple-400">
-              Stakers List
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="mt-6 space-y-2">
-              {!address && <p>Please connect your wallet to view stakers.</p>}
-              {address && isLoading && <p>Loading stakers...</p>}
-              {address && error && (
-                <p className="text-red-500">Error: {error}</p>
-              )}
-              {address && !isLoading && !error && stakers && (
-                <>
-                  <p>
-                    <strong>Total Stakers:</strong> {stakers.length}
-                  </p>
-                  <div className="max-h-40 overflow-y-auto">
-                    <ul className="list-disc list-inside">
-                      {stakers.slice(0, 10).map((staker, index) => (
-                        <li key={index} className="text-sm">
-                          {staker.slice(0, 6)}...{staker.slice(-4)}
-                        </li>
-                      ))}
-                      {stakers.length > 10 && (
-                        <li className="text-sm text-gray-400">
-                          ... and {stakers.length - 10} more
-                        </li>
-                      )}
-                    </ul>
-                  </div>
-                </>
-              )}
-              {address &&
-                !isLoading &&
-                !error &&
-                (!stakers || stakers.length === 0) && <p>No stakers found.</p>}
-            </div>
           </CardContent>
         </Card>
       </div>
