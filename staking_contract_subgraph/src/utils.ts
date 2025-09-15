@@ -46,9 +46,9 @@ export function loadTransactionDetails(userAddress: string): Transactions {
     transactions.blockTimestamp = BigInt.fromI32(0);
   }
 
-  // Note: Aggregate transaction data may need to be updated via event handlers
   transactions.save();
   return transactions;
+  //return the transactions
 }
 
 export function loadTokenDetails(contractAddress: string): token {
@@ -62,7 +62,6 @@ export function loadTokenDetails(contractAddress: string): token {
     tokenDetails.timestamp = BigInt.zero();
   }
 
-  // Note: Aggregate transaction data may need to be updated via event handlers
   tokenDetails.save();
   return tokenDetails;
 }
