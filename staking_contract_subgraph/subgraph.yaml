@@ -19,11 +19,6 @@ dataSources:
         - token
         - Transactions
         - ContractDetails
-        - EmergencyWithdrawnEvent
-        - RewardsClaimedEvent
-        - StakedEvent
-        - WithdrawnEvent
-        - TokenEvent
       abis:
         - name: stake_contract
           file: ./abis/stake_contract.json
@@ -37,7 +32,7 @@ dataSources:
         - event: Withdrawn(indexed address,uint256,uint256,uint256,uint256,uint256)
           handler: handleWithdrawn
         - event: token(uint256,address,uint256)
-          handler: handletoken
+          handler: handleToken
       file: ./src/stake-contract.ts
   - kind: ethereum
     name: staking_token_contract

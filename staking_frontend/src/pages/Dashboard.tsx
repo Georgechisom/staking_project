@@ -221,7 +221,7 @@ const Dashboard: React.FC = () => {
       <Card className="bg-gradient-to-br from-slate-900 to-purple-900 border-purple-500/20 text-white">
         <CardHeader>
           <CardTitle className="text-center text-purple-400">
-            Your Activity Details
+            Your Recent Activities
           </CardTitle>
         </CardHeader>
         <CardContent>
