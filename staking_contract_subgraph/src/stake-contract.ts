@@ -6,9 +6,16 @@ import {
   Withdrawn as WithdrawnEvent,
   token as tokenEvent,
 } from "../generated/stake_contract/stake_contract";
-import { token, Transactions } from "../generated/schema";
+import {
+  token,
+  Transactions,
+  EmergencyWithdrawnEvent as EmergencyWithdrawnEntity,
+  RewardsClaimedEvent as RewardsClaimedEntity,
+  StakedEvent as StakedEntity,
+  WithdrawnEvent as WithdrawnEntity,
+  TokenEvent,
+} from "../generated/schema";
 import { loadContractDetails, loadTransactionDetails } from "./utils";
-import { Transaction } from "ethers";
 
 export function handleEmergencyWithdrawn(event: EmergencyWithdrawnEvent): void {
   let contractDetails = loadContractDetails(event.address.toHexString());
@@ -28,6 +35,14 @@ export function handleEmergencyWithdrawn(event: EmergencyWithdrawnEvent): void {
       transactions.totalUserEmergencyWithdrawn.plus(event.params.amount);
   }
   transactions.save();
+
+  let entityId = event.transaction.hash.concatI32(event.logIndex.toI32());
+  let entity = new EmergencyWithdrawnEntity(entityId);
+  entity.user = event.params.user;
+  entity.amount = event.params.amount;
+  entity.blockNumber = event.block.number;
+  entity.blockTimestamp = event.block.timestamp;
+  entity.save();
 }
 
 export function handleRewardsClaimed(event: RewardsClaimedEvent): void {
@@ -45,6 +60,14 @@ export function handleRewardsClaimed(event: RewardsClaimedEvent): void {
     event.params.amount
   );
   transactions.save();
+
+  let entityId = event.transaction.hash.concatI32(event.logIndex.toI32());
+  let entity = new RewardsClaimedEntity(entityId);
+  entity.user = event.params.user;
+  entity.amount = event.params.amount;
+  entity.blockNumber = event.block.number;
+  entity.blockTimestamp = event.block.timestamp;
+  entity.save();
 }
 
 export function handleStaked(event: StakedEvent): void {
@@ -62,6 +85,15 @@ export function handleStaked(event: StakedEvent): void {
     );
   }
   transactions.save();
+
+  let entityId = event.transaction.hash.concatI32(event.logIndex.toI32());
+  let entity = new StakedEntity(entityId);
+  entity.user = event.params.user;
+  entity.amount = event.params.amount;
+  entity.newTotalStaked = event.params.newTotalStaked;
+  entity.blockNumber = event.block.number;
+  entity.blockTimestamp = event.block.timestamp;
+  entity.save();
 }
 
 export function handleWithdrawn(event: WithdrawnEvent): void {
@@ -84,6 +116,14 @@ export function handleWithdrawn(event: WithdrawnEvent): void {
     );
   }
   transactions.save();
+
+  let entityId = event.transaction.hash.concatI32(event.logIndex.toI32());
+  let entity = new WithdrawnEntity(entityId);
+  entity.user = event.params.user;
+  entity.amount = event.params.amount;
+  entity.blockNumber = event.block.number;
+  entity.blockTimestamp = event.block.timestamp;
+  entity.save();
 }
 
 export function handleToken(event: tokenEvent): void {
@@ -106,4 +146,12 @@ export function handleToken(event: tokenEvent): void {
     );
   }
   transactions.save();
+
+  let entityId = event.transaction.hash.concatI32(event.logIndex.toI32());
+  let entity = new TokenEvent(entityId);
+  entity.value = event.params.value;
+  entity.user = event.params.user;
+  entity.blockNumber = event.block.number;
+  entity.blockTimestamp = event.block.timestamp;
+  entity.save();
 }

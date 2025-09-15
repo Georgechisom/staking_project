@@ -25,9 +25,11 @@ export function handleApproval(event: ApprovalEvent): void {
   transactions.totalTransactions = transactions.totalTransactions.plus(
     BigInt.fromI32(1)
   );
-  transactions.totalUserTransactions = transactions.totalUserTransactions.plus(
-    BigInt.fromI32(1)
-  );
+
+  if (event.params.value) {
+    transactions.totalUserTransactions =
+      transactions.totalUserTransactions.plus(BigInt.fromI32(1));
+  }
   transactions.save();
 }
 
@@ -50,8 +52,9 @@ export function handleTransfer(event: TransferEvent): void {
   transactions.totalTransactions = transactions.totalTransactions.plus(
     BigInt.fromI32(1)
   );
-  transactions.totalUserTransactions = transactions.totalUserTransactions.plus(
-    BigInt.fromI32(1)
-  );
+  if (event.params.value) {
+    transactions.totalUserTransactions =
+      transactions.totalUserTransactions.plus(BigInt.fromI32(1));
+  }
   transactions.save();
 }

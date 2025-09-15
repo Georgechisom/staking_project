@@ -19,6 +19,11 @@ dataSources:
         - token
         - Transactions
         - ContractDetails
+        - EmergencyWithdrawnEvent
+        - RewardsClaimedEvent
+        - StakedEvent
+        - WithdrawnEvent
+        - TokenEvent
       abis:
         - name: stake_contract
           file: ./abis/stake_contract.json
